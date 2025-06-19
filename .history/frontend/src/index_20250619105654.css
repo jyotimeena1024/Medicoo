@@ -1,0 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*{
+  
+}
+
+/* Make hr inside active class visible */
+.active hr {
+  @apply block; /* ✅ semicolon added */
+}
+
+/* Hide scrollbar - use raw CSS, not Tailwind */
+::-webkit-scrollbar {
+  display: none; /* ✅ use regular CSS for pseudo-elements */
+}
