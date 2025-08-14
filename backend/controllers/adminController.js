@@ -4,6 +4,7 @@ import { v2 as cloudinary } from "cloudinary";
 import doctorModel from "../models/doctorModels.js";
 import jwt from 'jsonwebtoken';
 import appointmentModel from "../models/appointmentModel.js";
+import userModel from "../models/userModel.js";
 
 const addDoctor = async (req, res) => {
   try {
@@ -48,11 +49,10 @@ const addDoctor = async (req, res) => {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
-
-     // upload image to cloudinary
+    
+      // upload image to cloudinary
      const imageUpload=await cloudinary.uploader.upload(imageFile.path,{resource_type:"image"})
      const imageUrl=imageUpload.secure_url
-
 
       // Create doctor object
       const doctorData = {
@@ -71,8 +71,6 @@ const addDoctor = async (req, res) => {
 
       const newDoctor = new doctorModel(doctorData);
       await newDoctor.save();
-      
-
       res.json({ success: true, message: "Doctor Added" });
     //(201).json
     } catch (error) {
@@ -92,7 +90,6 @@ const loginAdmin=async (req,res) => {
     }else{
       res.json({success:false,message:"Invalid credentials"})
     }
-    
   }catch(error){
     console.log(error)
     res.json({success:false,message:error.message})
@@ -110,7 +107,6 @@ const allDoctors=async(req,res)=>{
 }
 
 // API to get all appointments list
-
 const appointmentsAdmin = async (req,res) => {
   try{
     const appointments = await appointmentModel.find({})
@@ -122,10 +118,8 @@ const appointmentsAdmin = async (req,res) => {
 }
 
 // API for admin cancellation
-
 const appointmentCancel=async(req,res)=>{
     try {
-        
         const {appointmentId} =req.body
 
         const appointmentData=await appointmentModel.findById(appointmentId)
@@ -146,12 +140,35 @@ const appointmentCancel=async(req,res)=>{
 
         res.json({success:true,message:"Appointment cancelled"})
 
-
-
     } catch (error) {
         console.log(error)
         res.json({ success: false, message: error.message })
     }
 }
 
-export { addDoctor,loginAdmin,allDoctors,appointmentsAdmin, appointmentCancel};
+// API to get dashboard data for admin panel
+const adminDashboard = async (req,res) => {
+
+  try{
+
+    const doctors = await doctorModel.find({})
+    const users = await userModel.find({})
+    const appointments = await appointmentModel.find({})
+
+    const dashData = {
+      doctors: doctors.length,
+      appointments: appointments.length,
+      patients: users.length,
+      latestAppointments: appointments.reverse().slice(0,5)
+    }
+
+    res.json({success:true,dashData})
+
+  }catch(error){
+    console.log(error)
+    res.json({ success: false, message: error.message })
+  }
+
+}
+
+export { addDoctor,loginAdmin,allDoctors,appointmentsAdmin, appointmentCancel, adminDashboard};
